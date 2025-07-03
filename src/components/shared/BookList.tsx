@@ -81,7 +81,7 @@ function BooksTable() {
                 <TableCell>{book.genre}</TableCell>
                 <TableCell>{book.isbn}</TableCell>
                 <TableCell className="text-center">{book.copies}</TableCell>
-                <TableCell>{book.available ? "✅" : "❌"}</TableCell>
+                <TableCell>{book.copies > 0 ? "✅" : "❌"}</TableCell>
                 <TableCell className="text-right">
                   <AlertDialog>
                     <DropdownMenu
