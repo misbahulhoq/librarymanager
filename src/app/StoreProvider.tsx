@@ -12,7 +12,7 @@ export default function StoreProvider({
   return (
     <Provider store={store}>
       <Navbar />
-      {children}
+      <div className="min-h-screen">{children}</div>
       <Footer />
     </Provider>
   );

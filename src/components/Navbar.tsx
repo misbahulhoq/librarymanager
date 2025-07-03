@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"; // Often used for triggers
 const navLinks = [
   { href: "/books", label: "All Books" },
   { href: "/books/add", label: "Add Book" },
-  { href: "/summary", label: "Borrow Summary" },
+  { href: "/borrow-summary", label: "Borrow Summary" },
 ];
 
 export function Navbar() {
