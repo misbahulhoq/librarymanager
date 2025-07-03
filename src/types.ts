@@ -6,5 +6,5 @@ export type Book = {
   isbn: string;
   description: string;
   copies: number;
-  availability: boolean;
+  available: boolean;
 };

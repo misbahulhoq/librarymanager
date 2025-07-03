@@ -17,16 +17,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { Book } from "@/types";
 import { useGetBooksQuery } from "@/redux/features/book/bookApiSlice";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import React from "react";
 
 function BooksTable() {
   const { data: books, isLoading } = useGetBooksQuery(undefined);
+  const [openMenuId, setOpenMenuId] = React.useState<string | null>(null);
+
+  const handleDelete = (id: string, title: string) => {
+    console.log({ id, title });
+  };
+
   if (isLoading) return <div>Loading...</div>;
-  console.log(process.env.NODE_ENV);
   return (
     <div className="w-full rounded-md border">
       <Table>
@@ -52,7 +67,7 @@ function BooksTable() {
                 <TableCell>{book.isbn}</TableCell>
                 <TableCell className="text-center">{book.copies}</TableCell>
                 <TableCell>
-                  <Badge
+                  {/* <Badge
                     className={cn(
                       book.availability
                         ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400 hover:bg-green-200"
@@ -60,36 +75,94 @@ function BooksTable() {
                     )}
                   >
                     {book.availability}
-                  </Badge>
+                  </Badge> */}
+                  {book.available ? "✅" : "❌"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          alert(`Viewing details for ${book.title}`)
-                        }
+                  <AlertDialog>
+                    <DropdownMenu
+                      open={openMenuId === book._id}
+                      onOpenChange={(isOpen) => {
+                        setOpenMenuId(isOpen ? book._id : null);
+                      }}
+                    >
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 cursor-pointer"
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4 cursor-pointer" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="cursor-pointer"
                       >
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => alert(`Editing ${book.title}`)}
-                      >
-                        Edit Book
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/60">
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            alert(`Viewing details for ${book.title}`)
+                          }
+                          className="cursor-pointer"
+                        >
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => alert(`Editing ${book.title}`)}
+                          className="cursor-pointer"
+                        >
+                          Edit Book
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => alert(`Borrowing ${book.title}`)}
+                          className="cursor-pointer"
+                        >
+                          Borrow Book
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {/* This is the new trigger for the dialog */}
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem
+                            className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/60"
+                            // Prevent the dropdown from closing when this is clicked
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete the book titled{" "}
+                          <strong className="text-foreground">
+                            {book.title}
+                          </strong>{" "}
+                          from the server.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setOpenMenuId(null)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          className={buttonVariants({ variant: "destructive" })}
+                          onClick={() => {
+                            handleDelete(book._id, book.title);
+                            setOpenMenuId(null);
+                          }}
+                        >
+                          Yes, delete book
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))

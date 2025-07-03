@@ -6,7 +6,7 @@ export function Footer() {
 
   return (
     <footer className="w-full border-t bg-muted/40">
-      <div className="container mx-auto flex flex-col items-start justify-between space-y-8 py-10 md:flex-row md:space-y-0">
+      <div className="container-center flex flex-col items-start justify-between space-y-8 py-10 md:flex-row md:space-y-0">
         {/* Site Info Section */}
         <div className="flex flex-col space-y-4">
           <Link href="/" className="flex items-center space-x-2">

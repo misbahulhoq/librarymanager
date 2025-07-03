@@ -8,8 +8,6 @@ let baseUrl =
 
 baseUrl = "https://api-librarymanager.vercel.app/api";
 
-console.log(baseUrl);
-
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
