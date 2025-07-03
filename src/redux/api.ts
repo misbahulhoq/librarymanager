@@ -1,8 +1,14 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 //TODO
-const baseUrl =
-  process.env.NODE_ENV === "development" ? "http://localhost:5000" : "";
+let baseUrl =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000/api"
+    : "https://api-librarymanager.vercel.app/api";
+
+baseUrl = "https://api-librarymanager.vercel.app/api";
+
+console.log(baseUrl);
 
 export const baseApi = createApi({
   reducerPath: "api",
