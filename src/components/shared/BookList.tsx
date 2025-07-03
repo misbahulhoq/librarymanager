@@ -1,6 +1,27 @@
 "use client";
-import { MoreHorizontal } from "lucide-react";
+// default imports
+import React from "react";
 import Swal from "sweetalert2";
+import z from "zod";
+// default imports end
+
+// Hooks import start
+import {
+  useDeleteBookMutation,
+  useGetBooksQuery,
+} from "@/redux/features/book/bookApiSlice";
+import { useForm } from "react-hook-form";
+// Hooks import end
+
+// Named imports
+import { MoreHorizontal, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Book } from "@/types";
+// Named imports end
+
+// Shadcn Ui imports
 import {
   Table,
   TableBody,
@@ -19,11 +40,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button, buttonVariants } from "@/components/ui/button";
-import type { Book } from "@/types";
-import {
-  useDeleteBookMutation,
-  useGetBooksQuery,
-} from "@/redux/features/book/bookApiSlice";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +51,32 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 function BooksTable() {
   const { data: books, isLoading } = useGetBooksQuery(undefined);
@@ -118,12 +159,18 @@ function BooksTable() {
                         >
                           Edit Book
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => alert(`Borrowing ${book.title}`)}
-                          className="cursor-pointer"
-                        >
-                          Borrow Book
-                        </DropdownMenuItem>
+                        <BorrowForm
+                          book={book}
+                          trigger={
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                              className="cursor-pointer"
+                            >
+                              Borrow Book
+                            </DropdownMenuItem>
+                          }
+                        />
+
                         <DropdownMenuSeparator />
                         {/* This is the new trigger for the dialog */}
                         <AlertDialogTrigger asChild>
@@ -185,25 +232,137 @@ function BooksTable() {
 
 export default BooksTable;
 
-export function SuccessAlert({ open }: { open: boolean }) {
-  const [isOpen, setOpen] = React.useState(open);
+interface BorrowFormProps {
+  book: Book;
+  trigger: React.ReactNode;
+}
+
+export function BorrowForm({ book, trigger }: BorrowFormProps) {
+  const { title, copies } = book;
+  const formSchema = z.object({
+    quantity: z.coerce
+      .number()
+      .min(1, { message: "Quantity must be at least 1." })
+      .max(copies, { message: "Quantity cannot exceed available copies." }),
+    dueDate: z
+      .date({
+        required_error: "A due date is required.",
+      })
+      .refine(
+        (date) => {
+          // Ensure the selected date is not in the past (comparing against start of today)
+          const startOfToday = new Date();
+          startOfToday.setHours(0, 0, 0, 0);
+          return date >= startOfToday;
+        },
+        { message: "Due date cannot be in the past." }
+      ),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      quantity: 1,
+      // Set the due date to 2 weeks from today
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("Borrow request submitted:", {
+      title,
+      ...values,
+    });
+    alert(
+      `Borrowing ${values.quantity} of ${title} until ${format(
+        values.dueDate,
+        "PPP"
+      )}`
+    );
+  }
+
   return (
-    <AlertDialog open={isOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>The operation was successful</AlertDialogTitle>
-          {/* <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </AlertDialogDescription> */}
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setOpen(false)}>
-            Ok
-          </AlertDialogCancel>
-          {/* <AlertDialogAction>Continue</AlertDialogAction> */}
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Dialog>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Borrow: {title}</DialogTitle>
+          <DialogDescription>
+            Select the quantity and due date for your borrow request.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="grid gap-4 py-4">
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Due Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          // Disable past dates for better UX
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Close
+                </Button>
+              </DialogClose>
+              <Button type="submit">Borrow</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
