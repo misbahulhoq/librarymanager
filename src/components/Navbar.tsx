@@ -24,7 +24,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
+      <div className="container mx-auto flex h-14 items-center justify-between">
         {/* Logo and Desktop Navigation */}
         <Link href="/" className="mr-6 ml-2 flex items-center space-x-2">
           <BookMarked className="h-6 w-6 text-primary" />
