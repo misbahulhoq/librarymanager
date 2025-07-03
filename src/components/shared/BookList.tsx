@@ -1,5 +1,6 @@
 "use client";
 import { MoreHorizontal } from "lucide-react";
+import Swal from "sweetalert2";
 import {
   Table,
   TableBody,
@@ -19,7 +20,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { Book } from "@/types";
-import { useGetBooksQuery } from "@/redux/features/book/bookApiSlice";
+import {
+  useDeleteBookMutation,
+  useGetBooksQuery,
+} from "@/redux/features/book/bookApiSlice";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,9 +40,20 @@ import React from "react";
 function BooksTable() {
   const { data: books, isLoading } = useGetBooksQuery(undefined);
   const [openMenuId, setOpenMenuId] = React.useState<string | null>(null);
+  const [deleteBookById] = useDeleteBookMutation();
 
   const handleDelete = (id: string, title: string) => {
     console.log({ id, title });
+    deleteBookById(id)
+      .unwrap()
+      .then(() => {
+        Swal.fire({
+          title: "Delete Successful",
+          text: `"${title}" has been deleted successfully`,
+          icon: "success",
+          draggable: true,
+        });
+      });
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -66,18 +81,7 @@ function BooksTable() {
                 <TableCell>{book.genre}</TableCell>
                 <TableCell>{book.isbn}</TableCell>
                 <TableCell className="text-center">{book.copies}</TableCell>
-                <TableCell>
-                  {/* <Badge
-                    className={cn(
-                      book.availability
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400 hover:bg-green-200"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 hover:bg-amber-200"
-                    )}
-                  >
-                    {book.availability}
-                  </Badge> */}
-                  {book.available ? "✅" : "❌"}
-                </TableCell>
+                <TableCell>{book.available ? "✅" : "❌"}</TableCell>
                 <TableCell className="text-right">
                   <AlertDialog>
                     <DropdownMenu
@@ -180,3 +184,26 @@ function BooksTable() {
 }
 
 export default BooksTable;
+
+export function SuccessAlert({ open }: { open: boolean }) {
+  const [isOpen, setOpen] = React.useState(open);
+  return (
+    <AlertDialog open={isOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>The operation was successful</AlertDialogTitle>
+          {/* <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
+          </AlertDialogDescription> */}
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setOpen(false)}>
+            Ok
+          </AlertDialogCancel>
+          {/* <AlertDialogAction>Continue</AlertDialogAction> */}
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
