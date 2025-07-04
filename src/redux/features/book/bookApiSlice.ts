@@ -13,7 +13,22 @@ const booksApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Book"],
     }),
+    updateBook: builder.mutation({
+      query: (data) => {
+        console.log(data.info);
+        return {
+          url: `/books/${data._id}`,
+          method: "PUT",
+          body: data.info,
+        };
+      },
+      invalidatesTags: ["Book"],
+    }),
   }),
 });
 
-export const { useGetBooksQuery, useDeleteBookMutation } = booksApiSlice;
+export const {
+  useGetBooksQuery,
+  useDeleteBookMutation,
+  useUpdateBookMutation,
+} = booksApiSlice;
