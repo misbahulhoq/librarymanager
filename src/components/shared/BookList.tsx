@@ -77,6 +77,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { useBorrowBookMutation } from "@/redux/features/borrow/borrowApiSlice";
 
 function BooksTable() {
   const { data: books, isLoading } = useGetBooksQuery(undefined);
@@ -165,6 +166,7 @@ function BooksTable() {
                             <DropdownMenuItem
                               onSelect={(e) => e.preventDefault()}
                               className="cursor-pointer"
+                              disabled={book.copies === 0}
                             >
                               Borrow Book
                             </DropdownMenuItem>
@@ -238,9 +240,11 @@ interface BorrowFormProps {
 }
 
 export function BorrowForm({ book, trigger }: BorrowFormProps) {
-  const { title, copies } = book;
+  const { _id, title, copies } = book;
+  const [borrowBook, { isLoading }] = useBorrowBookMutation();
   const formSchema = z.object({
-    quantity: z.coerce
+    bookId: z.string(),
+    quantities: z.coerce
       .number()
       .min(1, { message: "Quantity must be at least 1." })
       .max(copies, { message: "Quantity cannot exceed available copies." }),
@@ -262,7 +266,8 @@ export function BorrowForm({ book, trigger }: BorrowFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      quantity: 1,
+      bookId: _id,
+      quantities: copies > 0 ? 1 : 0,
       // Set the due date to 2 weeks from today
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
     },
@@ -273,16 +278,16 @@ export function BorrowForm({ book, trigger }: BorrowFormProps) {
       title,
       ...values,
     });
-    alert(
-      `Borrowing ${values.quantity} of ${title} until ${format(
-        values.dueDate,
-        "PPP"
-      )}`
-    );
+    borrowBook(values)
+      .unwrap()
+      .then(() => {
+        form.reset();
+        alert(`${values.quantities} copies of ${title} borrowed successfully.`);
+      });
   }
 
   return (
-    <Dialog>
+    <Dialog data-state="closed">
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -297,7 +302,7 @@ export function BorrowForm({ book, trigger }: BorrowFormProps) {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="quantity"
+                name="quantities"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Quantity</FormLabel>
@@ -354,11 +359,13 @@ export function BorrowForm({ book, trigger }: BorrowFormProps) {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="secondary">
+                <Button disabled={isLoading} type="button" variant="secondary">
                   Close
                 </Button>
               </DialogClose>
-              <Button type="submit">Borrow</Button>
+              <Button type="submit" disabled={isLoading || copies === 0}>
+                {isLoading ? "Borrowing..." : "Borrow"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
