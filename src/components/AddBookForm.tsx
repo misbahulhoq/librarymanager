@@ -182,6 +182,7 @@ const EditBookForm = ({
 
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Updating..." : "Update"}
+                Save
               </Button>
             </form>
           </Form>
