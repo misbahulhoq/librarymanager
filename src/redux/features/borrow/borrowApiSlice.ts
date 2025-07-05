@@ -4,6 +4,7 @@ const borrowApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBorrows: builder.query({
       query: () => ({ url: "/borrows" }),
+      providesTags: ["Borrow"],
     }),
     borrowBook: builder.mutation({
       query: (data) => ({
@@ -11,7 +12,7 @@ const borrowApiSlice = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Book"],
+      invalidatesTags: ["Book", "Borrow"],
     }),
   }),
 });

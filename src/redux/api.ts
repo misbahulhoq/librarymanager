@@ -10,7 +10,7 @@ const baseUrl =
 
 export const baseApi = createApi({
   reducerPath: "api",
-  tagTypes: ["Book"],
+  tagTypes: ["Book", "Borrow"],
   baseQuery: fetchBaseQuery({
     baseUrl,
   }),
