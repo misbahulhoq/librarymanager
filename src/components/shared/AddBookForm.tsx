@@ -12,6 +12,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ const formSchema = z.object({
   copies: z.coerce.number().min(0, { message: "Copies must be at least 0." }),
 });
 
-const AddBookForm = () => {
+const AddBookForm = ({ isModal = false }: { isModal?: boolean }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,98 +54,21 @@ const AddBookForm = () => {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {/* Responsive Grid Layout */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Title Field */}
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., The Great Gatsby"
-                    {...field}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Author Field */}
-          <FormField
-            control={form.control}
-            name="author"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Author</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., F. Scott Fitzgerald"
-                    {...field}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Genre Field */}
-          <FormField
-            control={form.control}
-            name="genre"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Genre</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Classic Fiction"
-                    {...field}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* ISBN Field */}
-          <FormField
-            control={form.control}
-            name="isbn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ISBN</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., 978-0743273565"
-                    {...field}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Description Field - Spans both columns */}
-          <div className="md:col-span-2">
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-8}`}>
+          {/* Responsive Grid Layout */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Title Field */}
             <FormField
               control={form.control}
-              name="description"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="A short summary of the book..."
-                      className="resize-none"
+                    <Input
+                      placeholder="e.g., The Great Gatsby"
                       {...field}
                       value={field.value}
                     />
@@ -153,29 +77,116 @@ const AddBookForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Author Field */}
+            <FormField
+              control={form.control}
+              name="author"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Author</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., F. Scott Fitzgerald"
+                      {...field}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Genre Field */}
+            <FormField
+              control={form.control}
+              name="genre"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Genre</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Classic Fiction"
+                      {...field}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* ISBN Field */}
+            <FormField
+              control={form.control}
+              name="isbn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ISBN</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., 978-0743273565"
+                      {...field}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Description Field - Spans both columns */}
+            <div className="md:col-span-2">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="A short summary of the book..."
+                        className="resize-none"
+                        {...field}
+                        value={field.value}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Copies Field */}
+            <FormField
+              control={form.control}
+              name="copies"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Copies</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} value={field.value} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          {/* Copies Field */}
-          <FormField
-            control={form.control}
-            name="copies"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Copies</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} value={field.value} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <DialogFooter>
+            {isModal && (
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
             )}
-          />
-        </div>
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Adding..." : "Add"}
-        </Button>
-      </form>
-    </Form>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </>
   );
 };
 
