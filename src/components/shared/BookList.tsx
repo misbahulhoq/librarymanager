@@ -48,6 +48,7 @@ import {
 import { BorrowForm } from "../BorrowForm";
 import EditBookForm from "../EditBookForm";
 import AddBookDialog from "../AddBookDialog";
+import ViewBookDetails from "../ViewBookDetails";
 
 function BooksTable() {
   const { data: books, isLoading } = useGetBooksQuery(undefined);
@@ -76,7 +77,9 @@ function BooksTable() {
       </div>
       <div className="w-full rounded-md border">
         <Table>
-          <TableCaption>A list of all books in the library.</TableCaption>
+          <TableCaption className="pb-4">
+            A list of all books in the library.
+          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[250px]">Title</TableHead>
@@ -120,14 +123,18 @@ function BooksTable() {
                           className="cursor-pointer"
                         >
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              alert(`Viewing details for ${book.title}`)
+                          <ViewBookDetails
+                            book={book}
+                            trigger={
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="cursor-pointer"
+                              >
+                                View Details
+                              </DropdownMenuItem>
                             }
-                            className="cursor-pointer"
-                          >
-                            View Details
-                          </DropdownMenuItem>
+                          />
+
                           <EditBookForm
                             book={book}
                             trigger={
