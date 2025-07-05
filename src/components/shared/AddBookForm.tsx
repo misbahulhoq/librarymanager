@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useCreateBookMutation } from "@/redux/features/book/bookApiSlice";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
@@ -28,11 +29,27 @@ const formSchema = z.object({
 const AddBookForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      author: "",
+      genre: "",
+      isbn: "",
+      description: "",
+      copies: 0,
+    },
   });
+
+  const [addBook, { isLoading }] = useCreateBookMutation();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("Form submitted with the following values:");
     console.log(values);
+    addBook(values)
+      .unwrap()
+      .then(() => {
+        alert("book added successfully");
+        form.reset();
+      });
   }
 
   return (
@@ -48,7 +65,11 @@ const AddBookForm = () => {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., The Great Gatsby" {...field} />
+                  <Input
+                    placeholder="e.g., The Great Gatsby"
+                    {...field}
+                    value={field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -63,7 +84,11 @@ const AddBookForm = () => {
               <FormItem>
                 <FormLabel>Author</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., F. Scott Fitzgerald" {...field} />
+                  <Input
+                    placeholder="e.g., F. Scott Fitzgerald"
+                    {...field}
+                    value={field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -78,7 +103,11 @@ const AddBookForm = () => {
               <FormItem>
                 <FormLabel>Genre</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Classic Fiction" {...field} />
+                  <Input
+                    placeholder="e.g., Classic Fiction"
+                    {...field}
+                    value={field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -93,7 +122,11 @@ const AddBookForm = () => {
               <FormItem>
                 <FormLabel>ISBN</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., 978-0743273565" {...field} />
+                  <Input
+                    placeholder="e.g., 978-0743273565"
+                    {...field}
+                    value={field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,6 +146,7 @@ const AddBookForm = () => {
                       placeholder="A short summary of the book..."
                       className="resize-none"
                       {...field}
+                      value={field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -129,7 +163,7 @@ const AddBookForm = () => {
               <FormItem>
                 <FormLabel>Copies</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="number" {...field} value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -137,9 +171,8 @@ const AddBookForm = () => {
           />
         </div>
 
-        <Button type="submit">
-          {/* {isLoading ? "Adding..." : "Add"} */}
-          Add
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Adding..." : "Add"}
         </Button>
       </form>
     </Form>
