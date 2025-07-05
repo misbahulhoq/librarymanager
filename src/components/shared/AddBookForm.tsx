@@ -173,7 +173,7 @@ const AddBookForm = ({ isModal = false }: { isModal?: boolean }) => {
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="pt-5">
             {isModal && (
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
