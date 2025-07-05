@@ -93,7 +93,7 @@ function BooksTable() {
           </TableHeader>
           <TableBody>
             {books?.length > 0 ? (
-              books.map((book: Book) => (
+              books.reverse().map((book: Book) => (
                 <TableRow key={book._id}>
                   <TableCell className="font-medium">{book.title}</TableCell>
                   <TableCell>{book.author}</TableCell>
